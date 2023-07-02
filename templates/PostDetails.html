@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<body>
+    
+    <div><h1>{{Post.title}}</h1><br>
+        <h5>Summaries : </h5>
+        <p><b>{{Post.summaries}}</b></p><br>
+        <p>{{Post.body}}
+    </div>
+    <br>
+    <a style="margin-left=20px" href="{% url 'PostEdit' Post.id %}"><button class="btn btn-primary ">Edit Post</button></a>
+    <br><br>
+    <a href={% url 'PostDelete' Post.id %}><button class="btn btn-danger">Delete Post</button></a>
+</body>
+{% endblock content %}

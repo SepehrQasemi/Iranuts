@@ -1,0 +1,20 @@
+{% extends 'Base.html'%}
+
+{% block content %}
+    <div class="container">
+        <div class="row clearfix justify-content-center">
+            {% for Category in category_list %}
+        
+                <div class="card m-4 align-items-center"  style="width: 18rem;">
+                    <img src="{{ Category.image.url }}" alt="product" class="img-fluid">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">{{ Category.name }}</h5>
+                        {% comment %} <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> {% endcomment %}
+                        <a href={% url 'CategoryDetail' Category.id %} class="btn btn-primary ">Products</a>
+                    </div>
+                </div>
+        {% endfor %}
+         </div>
+    </div>
+    
+{% endblock content %}

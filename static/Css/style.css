@@ -1,0 +1,64 @@
+@import url(//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+@import url(https://fonts.googleapis.com/css?family=Titillium+Web:300);
+*{
+    margin: 5px;
+}
+body{
+    margin-left: 50px;
+    margin-right: 50px;
+    /* background: rgb(255,251,219);
+    background: linear-gradient(90deg, rgba(255,251,219,1) 12%, rgba(208,203,164,1) 77%); */
+    background: rgb(2,210,216);
+background: linear-gradient(71deg, rgba(2,210,216,0.7219499860491072) 10%, rgba(2,210,216,0.3998211345084909) 88%);
+}
+.cent{
+    
+    align-items: center;
+    align-content: center;
+    
+}
+.head{
+    font-size: 4em;
+    text-align: center;
+}
+.maintopdown{
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+.main{
+    margin-left: 50px;
+    margin-right: 50px;
+
+}
+.socialmedia{
+   align-content: center;
+   justify-content: center;
+
+}
+.button{
+    margin-left: 10px;
+}
+.fa-2x {
+font-size: 2em;
+}
+.fa {
+position: relative;
+display: table-cell;
+width: 60px;
+height: 36px;
+text-align: center;
+vertical-align: middle;
+font-size:20px;
+}
+
+
+
+@font-face {
+  font-family: 'Titillium Web';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Titillium WebLight'), local('TitilliumWeb-Light'), url(http://themes.googleusercontent.com/static/fonts/titilliumweb/v2/anMUvcNT0H1YN4FII8wpr24bNCNEoFTpS2BTjF6FB5E.woff) format('woff');
+}
+a{
+    color: #000000;
+}

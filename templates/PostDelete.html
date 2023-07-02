@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<p>Are you sure?</p>
+<form action='' method = 'post'>{% csrf_token %}
+    <button class="btn btn-primary ">Yes</button>
+    <a href = {% url 'Blog'%}><button class="btn btn-primary ">No</button></a>
+</form>
+{% endblock content %}

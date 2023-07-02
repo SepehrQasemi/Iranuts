@@ -1,0 +1,21 @@
+{% extends 'Base.html'%}
+{% block content %}
+    <div class="container">
+        <div class="row clearfix justify-content-center">
+            {% for Product in category.product_set.all %}
+        
+                <div class="card m-4 align-items-center text-center"  style="width: 18rem;">
+                    <img src="{{ Product.image.url }}" alt="product" class="img-fluid">
+                    <div class="card-body align-content-center">
+                        <h5 class="card-title text-center">{{ Product.name }} </h5>
+                        <h6 class="card-title text-center">{{ Product.price }}</h6>
+                        <a href={% url 'ProductDetail' Product.id %} class="btn btn-primary ">Buy</a>
+                    </div>
+                </div>
+        {% endfor %}
+         </div>
+    </div>
+
+    
+{% endblock content %}
+

@@ -1,0 +1,169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IraNuts</title>
+    <link rel='stylesheet' href='{% static 'Css/style.css' %}'>
+    <link rel='stylesheet' href='{% static 'Css/bootstrap.min.css' %}'>
+    
+</head>
+
+<body class="d-flex flex-column h-100">
+    <h1 class='head'><i class="fa-brands fa-nutritionix"></i> IRANUTS</h1>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary rounded">
+    <div class="container-fluid">
+    {% comment %} <a class="navbar-brand" href="#"><i class="fa-brands fa-nutritionix"></i></a> {% endcomment %}
+    <i class="fa-brands fa-nutritionix fa-2xl"></i>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link " aria-current="page" href="{% url 'HomePage' %}"><b>Home</b></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'CategoryView' %}"><b>Categories</b></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'Blog' %}"><b>Blog</b></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'AboutUs' %}"><b>About Us</b></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'ContactUs' %}"><b>Contact Us</b></a>
+        </li>
+      </ul>
+      <form class="d-flex m-3" role="search" method="get">
+        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search">
+        <button class="btn btn-outline-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+      </form>
+      <div class="nav-item dropdown navbar-nav mb-2 mb-lg-0">
+         {% if user.is_authenticated %}
+           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa-regular fa-circle-user"></i>
+              {{ user.first_name }}
+            </a>
+             <ul class="dropdown-menu dropdown-menu-end">
+               <li><a class="dropdown-item" href="{% url 'Profile' user.id %}">Profile <i class="fa-solid fa-address-card"></i></a> </li>
+               
+               <li><a class="dropdown-item" href="{% url 'CartView' user.id %}">
+                  Cart
+                  <i class="fa-solid fa-cart-shopping"></i>
+                 </a>
+                </li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" id="logoutLink" style="cursor: pointer" href="{% url 'logout'%}">Logout</a></li>
+              </ul>
+            {% else %}
+                        <a class="nav-link" href="{% url 'login' %}">Signin/Signup</a>
+            {% endif %}
+      </div>
+      </div>
+    </div>
+  </nav>
+
+    <div class='main'>{% block content %}
+
+      {% endblock content %}</div>
+      <script src="https://kit.fontawesome.com/7b265bb996.js" crossorigin="anonymous"></script>
+      <script src={% static 'Js/bootstrap.bundle.min.js' %}></script>
+
+
+
+    <!-- Footer -->
+<footer class="text-center text-lg-start bg-white text-muted footer mt-auto py-3 rounded-top">
+  
+
+  <!-- Section: Links  -->
+  <section class="">
+    <div class="container text-center text-md-start mt-5">
+      <!-- Grid row -->
+      <div class="row mt-3">
+        <!-- Grid column -->
+        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+          <!-- Content -->
+          <h6 class="text-uppercase fw-bold mb-4">
+            <i class="fa-brands fa-nutritionix fa-lg"></i> Iranuts
+          </h6>
+          <p>
+            Here you can use rows and columns to organize your footer content. Lorem ipsum
+            dolor sit amet, consectetur adipisicing elit.
+          </p>
+        </div>
+        <!-- Grid column -->
+
+        <!-- Grid column -->
+        <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
+          <!-- Links -->
+          <h6 class="text-uppercase fw-bold mb-4">
+            Categories
+          </h6>
+          <p>
+            <a href="{% url 'CategoryDetail' 1 %}" class="text-reset">Pistachio</a>
+          </p>
+
+            <a href="{% url 'CategoryDetail' 2 %}" class="text-reset">Amonds</a>
+          </p>
+          <p>
+            <a href="{% url 'CategoryDetail' 3 %}" class="text-reset">Walnut</a>
+          </p>
+          <p>
+          <p>
+            <a href="{% url 'CategoryView' %}" class="text-reset">All Categories</a>
+          </p>
+        </div>
+        <!-- Grid column -->
+
+        <!-- Grid column -->
+        <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
+          <!-- Links -->
+          <h6 class="text-uppercase fw-bold mb-4">
+            Site Map
+          </h6>
+          <p>
+            <a href="{% url 'Blog' %}" class="text-reset">Blog</a>
+          </p>
+          <p>
+            <a href="{% url 'AboutUs' %}" class="text-reset">About Us</a>
+          </p>
+          <p>
+            <a href="{% url 'ContactUs' %}" class="text-reset">Contact Us</a>
+          </p>
+        </div>
+        <!-- Grid column -->
+
+        <!-- Grid column -->
+        <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
+          <!-- Links -->
+          <h6 class="text-uppercase fw-bold mb-4">Contact</h6>
+          <p><i class="fa-solid fa-house"></i> Tehran, Iran</p>
+          <p>
+            <i class="fas fa-envelope me-3"></i>
+            Sepehrghasemi13@gmail.com
+          </p>
+          <p><i class="fa-solid fa-phone"></i> +989371889805</p>
+          <p><i class="fa-solid fa-phone"></i> +989198070895</p>
+        <!-- Grid column -->
+      </div>
+      <!-- Grid row -->
+    </div>
+  </section>
+  <!-- Section: Links  -->
+
+  <!-- Copyright -->
+  <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.025);">
+    © 2023 Copyright:
+    <a class="text-reset fw-bold" href="https://mdbootstrap.com/">Iranuts.com</a>
+  </div>
+  <!-- Copyright -->
+</footer>
+<!-- Footer -->
+</body>
+</html>

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% comment %} <div class="container">
+        <div class="row h-100" >
+            <div class="col h-25" > <img src="{{ Product.image.url }}" class="rounded" style="height: 100%">image</div>
+                <div class="col">
+                    <div class="row">
+                        <div class="col"><h1>{{ Product.name }}name</h1></div>
+                    </div>
+                    <br><br>
+                    <br>
+                    <div class="row">
+                        
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col">
+                            <p class="h4">$ {{ Product.price }}price / kilogram</p>
+                        </div>
+                    </div>
+
+                    <br><br>
+                    <div class="row">
+                        <div class="col">
+                            {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'addtocart' %}">
+                                    {% csrf_token %}
+                                    <div class="btn-group btn-group-sm">
+                                        <input type="hidden" name="product" value="{{ Product.id }}">
+                                        <input type="text" class="form-control form-control-sm" name="quantity" placeholder="Quantity(Gram)" style="width: 10rem">
+                                        <button type="submit" class="btn btn-primary"><i class="fa fa-cart-plus" ></i></button>
+                                    </div>
+                                </form>
+
+                            {% else %}
+                                <p><a href="{% url 'login' %}">Login</a>Login required</p>
+                            {% endif %}
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+        </div>
+    </div> {% endcomment %}
+    
+        <div class="card mb-3 w-75 cent mx-auto" >
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="{{ Product.image.url }}" class="img-fluid rounded-start" alt="...">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                    <h3 class="card-title ">{{ Product.name }}</h3>
+                    <p class="card-text">{{Product.description}}</p>
+                    <p class="card-text"><small class="text-body-secondary">{{ Product.inventry_set.all}}</small></p>
+                    <p class="h4">$ {{ Product.price }}/ kilogram</p>
+                    {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'AddToCart' %}">
+                                    {% csrf_token %}
+                                    <div class="btn-group btn-group-sm">
+                                        <input type="hidden" name="Product" value="{{ Product.id }}">
+                                        <input type="number" class="form-control form-control-sm" name="quantity" placeholder="Quantity(kilogram)" style="width: 10rem">
+                                        <button type="submit" class="btn btn-primary"><i class="fa fa-cart-plus" ></i></button>
+                                    </div>
+                                </form>
+
+                            {% else %}
+                                <p><a href="{% url 'login' %}">Login</a>Login required</p>
+                            {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock content %}
