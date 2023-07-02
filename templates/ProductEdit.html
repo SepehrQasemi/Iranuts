@@ -1,0 +1,10 @@
+{% extends 'Base.html'%}
+{% block content %}
+<form action='' method = 'post'>{% csrf_token %}
+    {{ form.as_p }}
+<input type="submit" value="Save">
+ <br>
+</form>
+<a href={% url 'ProductDelete' product.id %}><button class="btn btn-danger">Delete Product</button></a>
+
+{% endblock content %}

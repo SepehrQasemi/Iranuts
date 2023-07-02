@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+   {% comment %} <section class="pt-5 pb-5">
+        <div class="container">
+            <div class="row w-100">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <h3 class="display-5 mb-2 text-center">سبد خرید</h3>
+                    <p class="mb-5 text-center">محصولات موجود در سبد خرید <i
+                            class="text-info font-weight-bold">{{ cart.cartitem_set.all.count }}</i></p>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-danger">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <table id="shoppingCart" class="table table-condensed table-responsive">
+                        <thead>
+                        <tr>
+                            <th style="width:60%">محصول</th>
+                            <th style="width:12%">قیمت هر گرم(تومان)</th>
+                            <th style="width:10%">مقدار(گرم)</th>
+                            <th style="width:16%"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for cartitem in cart.cartitem_set.all %}
+
+
+
+                            <tr>
+                                <td data-th="Product">
+                                    <div class="row">
+                                        <div class="col-md-3 text-left">
+                                            <img src="{{ cartitem.product.avatar.url }}" alt=""
+                                                 class="img-fluid d-none d-md-block rounded mb-2 shadow ">
+                                        </div>
+                                        <div class="col-md-9 text-left mt-sm-2">
+                                            <h4>{{ cartitem.product.name }}</h4>
+                                            <p class="font-weight-light">({{ cartitem.product.Type }})</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td data-th="Price">{{ cartitem.product.price |intcomma }}</td>
+                                <form method="post" action="{% url 'updatcart' cartitem.id %}">
+                                    {% csrf_token %}
+                                    <td data-th="Quantity">
+                                        <input type="number" name="quantity"
+                                               class="form-control form-control-lg text-center"
+                                               value="{{ cartitem.quantity }}">
+                                    </td>
+                                    <td class="actions" data-th="">
+                                        <div class="text-right">
+                                            <button type="submit"
+                                                    class="btn btn-white border-secondary bg-white btn-md mb-2">
+                                                <i class="fas fa-sync"></i>
+                                            </button>
+                                </form>
+                                <form method="post" action="{% url 'deletefromcart' cartitem.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-white border-secondary bg-white btn-md mb-2">
+                                </form>
+                                <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            </td>
+                            </tr>
+                        {% endfor %}
+                </tbody>
+                </table>
+                <div class="float-right text-right">
+                    <h4>جمع کل:</h4>
+                    <h1>{{ totalprice|intcomma }} تومان</h1>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4 d-flex align-items-center" id="replace">
+            <div class="col-sm-6 order-md-2 text-right">
+
+            </div>
+            
+        </div>
+
+    </section> {% endcomment %}
+
+    
+  <section class="h-100 h-custom" style="background-color: #eee;">
+  <div class="container h-100 py-5">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col">
+        <div class="card shopping-cart" style="border-radius: 15px;">
+          <div class="card-body text-black">
+
+            <div class="row">
+              <div class="col-lg-6 px-5 py-4">
+
+                <h3 class="mb-5 pt-2 text-center fw-bold text-uppercase">Your Cart</h3>
+{{cart.cartitem_set.all}}
+                {% for cartitem in cart.cartitem_set.all %}
+                
+                <div class="d-flex align-items-center mb-5">
+                  <div class="flex-shrink-0">
+                    <img src="{{ cartitem.product.image.url }}"
+                      class="img-fluid" style="width: 150px;" alt="Generic placeholder image">
+                  </div>
+                  <div class="flex-grow-1 ms-3">
+                    <a href="#!" class="float-end text-black"><i class="fas fa-times"></i></a>
+                    <h5 class="text-primary">{{ cartitem.product.name }}</h5>
+                    <h6 style="color: #9e9e9e;">Category : {{ cartitem.product.category.name }}: </h6>
+                    <div class="d-flex align-items-center">
+                      <p class="fw-bold mb-0 me-5 pe-3">{{ cartitem.product.price |intcomma }}</p>
+                      <div class="def-number-input number-input safari_only">
+                        <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()"
+                          class="minus"></button>
+                        <input class="quantity fw-bold text-black" min="0" name="quantity" value="{{ cartitem.quantity }}"
+                          type="number">
+                        <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()"
+                          class="plus"></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {% endfor %}
+                
+                <hr class="mb-4" style="height: 2px; background-color: #1266f1; opacity: 1;">
+
+                <div class="d-flex justify-content-between p-2 mb-2" style="background-color: #e1f5fe;">
+                  <h5 class="fw-bold mb-0">Total:</h5>
+                  <h5 class="fw-bold mb-0">{{ totalprice|intcomma }}$</h5>
+                </div>
+
+              </div>
+            
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+ 
+{% endblock %}
