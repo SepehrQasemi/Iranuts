@@ -49,7 +49,7 @@ class ProfileView(LoginRequiredMixin,DetailView):
 class ProfileEdit(UserPassesTestMixin,UpdateView):
     model=CustomUser
     template_name='ProfileEdit.html'
-    fields =['first_name', 'last_name','province','address']
+    fields =['first_name', 'last_name','address']
 
     def get_success_url(self):
         return reverse_lazy ('Profile',args = (self.object.id,))

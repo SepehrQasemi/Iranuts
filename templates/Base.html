@@ -51,7 +51,7 @@
              <ul class="dropdown-menu dropdown-menu-end">
                <li><a class="dropdown-item" href="{% url 'Profile' user.id %}">Profile <i class="fa-solid fa-address-card"></i></a> </li>
                
-               <li><a class="dropdown-item" href="{% url 'CartView' user.id %}">
+                <li><a class="dropdown-item" href="{% url 'CartView' user.cart.id %}">
                   Cart
                   <i class="fa-solid fa-cart-shopping"></i>
                  </a>

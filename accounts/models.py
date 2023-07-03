@@ -16,12 +16,13 @@ class CustomUser (AbstractUser):
         )
     ])
     email = models.CharField(max_length=254,null=True,blank=True)
-    province = models.ForeignKey(Province,on_delete=models.SET_NULL,null=True,blank=True)
+    # province = models.ForeignKey(Province,on_delete=models.SET_NULL,null=True,blank=True)
     address = models.TextField(null=True,blank=True)
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = []
+    
     def __str__(self):
-        return str(self.first_name +' '+self.last_name)
+        return str(self.phone)
     
     
     objects = CustomUserManager()

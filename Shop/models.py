@@ -27,7 +27,7 @@ class Province(models.Model):
 
 class Inventory(models.Model):
     province = models.OneToOneField("Province", on_delete=models.CASCADE)
-    address = models.TextField(null=True,blank=True)
+    address = models.TextField(null=True,blank=True,)
     phone = models.CharField(null=True,blank=True,max_length=13,validators=[
         RegexValidator(
             
@@ -65,16 +65,24 @@ class Supplier(models.Model):
         return self.name
 
 
-class Cart(models.Model):
-    user = models.OneToOneField("accounts.CustomUser", on_delete=models.CASCADE)
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+    image = models.ImageField()
     def __str__(self):
-        return str(self.user.id)
+        return self.name
 
+
+class Cart(models.Model):
+    user=models.OneToOneField('accounts.CustomUser' , on_delete=models.CASCADE)
+    def __str__(self):
+        return str(self.user)
 
 class CartItem(models.Model):
-    product = models.ForeignKey("Product", on_delete=models.CASCADE)
-    cart = models.ForeignKey("Cart", on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
+    product=models.ForeignKey('Product' , on_delete=models.CASCADE)
+    cart=models.ForeignKey('Cart',on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=7, decimal_places=0)
+
+
     def save(self, *args, **kwargs):
         if not self.pk:  # Only execute this logic for newly created instances
             existing_instance = CartItem.objects.filter(product=self.product, cart=self.cart).first()
@@ -86,28 +94,38 @@ class CartItem(models.Model):
 
 
     def __str__(self):
-        return str(self.product) 
+        return str(self.product)
 
 class Order(models.Model):
-    user= models.ForeignKey("accounts.CustomUser",on_delete=models.SET_NULL ,null=True)
+    user = models.ForeignKey('accounts.CustomUser',on_delete=models.CASCADE,default="")
+    is_send=models.BooleanField(default=False)
+    province=models.ForeignKey('Province',on_delete=models.CASCADE,default="")
+    address=models.TextField(default="")
     def __str__(self):
-        return str(self.user.username)
-
-
-class Category(models.Model):
-    name = models.CharField(max_length=50)
-    image = models.ImageField()
-    def __str__(self):
-        return self.name
-
+        return str(self.user)
 
 class OrderItem(models.Model):
-    product = models.ForeignKey("Product", on_delete=models.CASCADE)
-    order = models.ForeignKey("Order", on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
+    product = models.ForeignKey('Product',models.CASCADE)
+    order = models.ForeignKey('Order',on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=9, decimal_places=0)
+
     def __str__(self):
-        return str(str(self.order.user.username) +" "+ self.product.name)
-    
+        return str(self.product)
+
+@receiver(post_save, sender=OrderItem)
+def decrease_quantity_create(sender, instance, created, **kwargs):
+    if created:
+        product = Product.objects.filter(id=instance.product.id).first()
+        inventoryProduct=InventoryProduct.objects.filter(product=product,inventory__province=instance.order.province).first()
+        if product:
+            inventoryProduct.quantity -= instance.quantity
+            if inventoryProduct.quantity>=0:
+                inventoryProduct.save()
+
+            else:
+                pass
+
+
 @receiver(pre_save, sender=OrderItem)
 def decrease_quantity_update(sender, instance, **kwargs):
     if instance.pk:
