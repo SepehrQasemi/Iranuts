@@ -1,6 +1,6 @@
 from typing import Any, Dict
 from django.shortcuts import render,redirect,get_object_or_404
-from django.views.generic import ListView ,TemplateView,CreateView,UpdateView,DeleteView,View,DetailView
+from django.views.generic import ListView ,TemplateView,CreateView,UpdateView,DeleteView,DetailView
 from .models import *
 from .froms import *
 from django.contrib import messages
@@ -172,44 +172,7 @@ class InventoryDetail(DetailView):
     template_name='InventoryDetail.html'
 
 
-def AddToCart(request):
-    if request.method=='POST':
-        cart=Cart.objects.get(user=request.user)
-        cartItem=CartItem(cart=cart,product_id=request.POST.get('Product'),quantity=int(request.POST.get('quantity')))
-        cartItem.save()
-        return redirect(request.META['HTTP_REFERER'])
 
-
-def CartEdit(request,cartItemId):
-    if request.method=='POST':
-        cartItem=CartItem.objects.get(id=cartItemId,cart__user=request.user)
-        cartItem.quantity=float(request.POST.get('quantity'))
-        cartItem.save()
-        return redirect(request.META['HTTP_REFERER'])
-    
-
-def CartDelete(request,cartItemId):
-    if request.method=='POST':
-        cartItem=CartItem.objects.get(id=cartItemId,cart__user=request.user)
-        cartItem.delete()
-        return redirect(request.META['HTTP_REFERER'])
-
-
-class CartView(UserPassesTestMixin,DetailView):
-    model=Cart
-    template_name="CartView.html"
-    def get_context_data(self, **kwargs):
-        context=super(CartView, self).get_context_data()
-        totalPrice=0
-        for cartItem in context['cart'].cartitem_set.all():
-            totalPrice+=cartItem.quantity*cartItem.product.price
-        context['totalprice']=totalPrice
-        Provine=Province.objects.filter(inventory__in=Inventory.objects.all())
-        context['Province']=Province
-        print(context['cart'])
-        return context
-    def test_func(self):
-        return self.request.user==self.get_object().user
     
 class Search (TemplateView):
     template_name="Search.html"
@@ -259,7 +222,7 @@ class InventoryProductCreate(UserPassesTestMixin,CreateView):
 
 class InventoryProductEdit(UserPassesTestMixin,UpdateView):
     model = InventoryProduct
-    template_name = 'InventoryProductEdit.html'
+    template_name = 'InventoryProductCreate.html'
     def get_success_url(self):
         return reverse_lazy('InventoryProductDetail',args=(self.object.id,))
 
@@ -274,6 +237,45 @@ class InventoryProductDelete(UserPassesTestMixin,DeleteView):
     def test_func(self):
         return self.request.user.is_superuser
 
+class CartDetailView(UserPassesTestMixin,DetailView):
+    model = Cart
+    template_name = 'CartView.html'
+    
+    def get_context_data(self, **kwargs):
+        context=super(CartDetailView, self).get_context_data()
+        totalPrice=0
+        for cartItem in context['cart'].cartitem_set.all():
+            totalPrice+=cartItem.quantity*cartItem.product.price
+        context['totalprice']=totalPrice
+        province=Province.objects.filter(inventory__in=Inventory.objects.all())
+        context['province']=province
+        return context
+    def test_func(self):
+        return self.request.user==self.get_object().user
+
+
+
+def addToCart(request):
+    if request.method=='POST':
+        cart=Cart.objects.get(user=request.user)
+        cartItem=CartItem(cart=cart,product_id=request.POST.get('Product'),quantity=int(request.POST.get('quantity')))
+        cartItem.save()
+        return redirect(request.META['HTTP_REFERER'])
+
+def updateCart(request,cartItemId):
+    
+    if request.method=='POST':
+        cartItem=CartItem.objects.get(id=cartItemId,cart__user=request.user)
+        cartItem.quantity=float(request.POST.get('quantity'))
+        cartItem.save()
+        return redirect(request.META['HTTP_REFERER'])
+
+
+def deletFromCart(request,cartItemId):
+    if request.method=='POST':
+        cartItem=CartItem.objects.get(id=cartItemId,cart__user=request.user)
+        cartItem.delete()
+        return redirect(request.META['HTTP_REFERER'])
 
 class OrderView(UserPassesTestMixin,ListView):
     model = Order
@@ -282,21 +284,12 @@ class OrderView(UserPassesTestMixin,ListView):
         return self.request.user.is_superuser
 
 
-class OrderEdit(UserPassesTestMixin,UpdateView):
-    model = Order
-    template_name = 'OrderEdit.html'
-    fields = ['is_send']
-    success_url = reverse_lazy('Order')
-    def test_func(self):
-        return self.request.user.is_superuser
-
-
-def OrderCreate(request):
+def orderCreate(request):
     if request.method=="POST":
         order=Order(user=request.user , province_id=request.POST.get('orderprovince'),address=request.POST.get('orderaddress'))
         items = []
         x=True
-        province=Province.objects.get(id=request.POST.get('OrderProvince'))
+        province=Province.objects.get(id=request.POST.get('orderprovince'))
         for idItem in tuple(dict(request.POST).values())[3:]:
             cartitem=CartItem.objects.get(id=int(idItem[0]))
             product=cartitem.product
@@ -307,11 +300,11 @@ def OrderCreate(request):
 
                 else:
                     x=False
-                    messages.error(request,f'مقدار سفارشی محصول {product.name} از مجودی انبار بیشتر است. مجودی انبار: {inventoryProduct.quantity}')
+                    messages.error(request,f'{product.name}:Your request is more than our quantity')
 
             else:
                 x=False
-                messages.error(request,f'محصول {product.name} در شهر شما موجود نیست.')
+                messages.error(request,f'{product.name}:This product is not available in your province')
 
         if x:
             order.save()
@@ -319,5 +312,22 @@ def OrderCreate(request):
                 item.save()
             Cart.objects.get(user=request.user).delete()
             Cart(user=request.user).save()
-            return redirect('products')
-        return redirect('cartdetail',request.user.cart.id)
+            return redirect('HomePage')
+        return redirect('CartView',request.user.cart.id)
+
+
+
+class OrderListVeiw(UserPassesTestMixin,ListView):
+    model = Order
+    template_name = 'orders.html'
+    def test_func(self):
+        return self.request.user.is_superuser
+
+class OrderUpdate(UserPassesTestMixin,UpdateView):
+    model = Order
+    template_name = 'orderupdate.html'
+    fields = ['is_send']
+    success_url = reverse_lazy('orders')
+    def test_func(self):
+        return self.request.user.is_superuser
+

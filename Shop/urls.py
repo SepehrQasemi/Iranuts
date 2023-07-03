@@ -33,12 +33,12 @@ urlpatterns = [
     path('InventoryProductCreate/',InventoryProductCreate.as_view(),name='InventoryProductCreate'),
     path('InventoryProductEdit/<int:pk>/',InventoryProductEdit.as_view(),name='InventoryProductEdit'),
     path('InventoryProductDelete/<int:pk>/',InventoryProductDelete.as_view(),name='InventoryProductDelete'),
-    path('AddToCart/', AddToCart, name='AddToCart'),
-    path('CartView/<int:pk>/',CartView.as_view(), name='CartView'),
-    # path('OrderView/<int:pk>/',OrderView.as_view(),'OrderView'),
-    # path('OrderEdit/<int:pk>/',OrderEdit.as_view(),'OrderEdit'),
-    path('OrderCreate/',OrderCreate,name='OrderCreate'),
-    path('CartEdit/<int:cartItemId>/',CartEdit,name='CartEdit'),
-    path('CartDelete/<int:cartItemId>/',CartDelete,name='CartDelete'),
+    path('addtocart/', addToCart, name='addtocart'),
+    path('Cart/<int:pk>/',CartDetailView.as_view(), name='CartView'),
+    path('OrderCreate/',orderCreate,name='ordercreate'),
+    path('CartEdit/<int:cartItemId>/',updateCart,name='updatcart'),
+    path('CartDelete/<int:cartItemId>/',deletFromCart,name='deletefromcart'),
+    path('Order/',OrderListVeiw.as_view(),name='orders'),
+    path('Order/update/<int:pk>/',OrderUpdate.as_view(),name='orderupdate')
     
 ]
