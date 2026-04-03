@@ -1,0 +1,21 @@
+{% extends 'Base.html' %}
+{% block content %}
+<table class="table table-striped table-hover">
+    <tbody>
+        <tr>
+            <th scope="row">Province</th>
+            <td>{{ inventoryproduct.inventory.province.name }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Product</th>
+            <td>{{ inventoryproduct.product.name }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Quantity</th>
+            <td>{{ inventoryproduct.quantity }}</td>
+        </tr>
+    </tbody>
+</table>
+<a href="{% url 'InventoryProductEdit' inventoryproduct.id %}" class="btn btn-primary">Edit</a>
+<a href="{% url 'InventoryProductDelete' inventoryproduct.id %}" class="btn btn-danger">Delete</a>
+{% endblock content %}

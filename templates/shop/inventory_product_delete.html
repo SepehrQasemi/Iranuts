@@ -1,0 +1,11 @@
+{% extends 'Base.html' %}
+{% block content %}
+<div class="container-fluid">
+    <form method="post">
+        {% csrf_token %}
+        <h2>Are you sure?</h2>
+        <a href="{% url 'InventoryProductDetail' inventoryproduct.id %}" class="btn btn-primary">Cancel</a>
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+</div>
+{% endblock %}

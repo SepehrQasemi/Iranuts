@@ -1,0 +1,20 @@
+{% extends 'Base.html'%}
+
+{% block content %}
+<div class="container">
+    <div class="row clearfix justify-content-center">
+        {% for product in product_list %}
+            <div class="card m-4 align-items-center text-center" style="width: 18rem;">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">${{ product.price }}</p>
+                    <a href="{% url 'ProductDetail' product.id %}" class="btn btn-primary">View product</a>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-center">No products available.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

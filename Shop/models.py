@@ -1,7 +1,5 @@
 from django.db import models
 from django.core.validators import RegexValidator
-from django.db.models.signals import post_save,pre_save,post_delete
-from django.dispatch import receiver
 
 
 class Product(models.Model):
@@ -44,6 +42,11 @@ class InventoryProduct(models.Model):
     product = models.ForeignKey("Product",on_delete=models.CASCADE)
     
     inventory = models.ForeignKey("Inventory",on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["inventory", "product"], name="unique_inventory_product"),
+        ]
     
     def __str__(self):
         return str(self.inventory.province.name + " " + self.product.name)
@@ -51,7 +54,7 @@ class InventoryProduct(models.Model):
 
 class Supplier(models.Model):
     name=models.CharField(max_length=50)
-    Province=models.ForeignKey("Province", on_delete=models.CASCADE)
+    province=models.ForeignKey("Province", on_delete=models.CASCADE)
     phone = models.CharField(null=False,blank=False,max_length=13,validators=[
         RegexValidator(
             
@@ -80,79 +83,39 @@ class Cart(models.Model):
 class CartItem(models.Model):
     product=models.ForeignKey('Product' , on_delete=models.CASCADE)
     cart=models.ForeignKey('Cart',on_delete=models.CASCADE)
-    quantity = models.DecimalField(max_digits=7, decimal_places=0)
+    quantity = models.PositiveIntegerField()
 
-
-    def save(self, *args, **kwargs):
-        if not self.pk:  # Only execute this logic for newly created instances
-            existing_instance = CartItem.objects.filter(product=self.product, cart=self.cart).first()
-            if existing_instance:
-                existing_instance.quantity += self.quantity
-                existing_instance.save()
-                return  # Exit early, no need to save the new instance
-        super().save(*args, **kwargs)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["cart", "product"], name="unique_cart_product"),
+            models.CheckConstraint(check=models.Q(quantity__gt=0), name="cart_item_quantity_gt_zero"),
+        ]
 
 
     def __str__(self):
         return str(self.product)
 
 class Order(models.Model):
-    user = models.ForeignKey('accounts.CustomUser',on_delete=models.CASCADE,default="")
-    is_send=models.BooleanField(default=False)
-    province=models.ForeignKey('Province',on_delete=models.CASCADE,default="")
-    address=models.TextField(default="")
+    user = models.ForeignKey('accounts.CustomUser',on_delete=models.CASCADE)
+    is_sent=models.BooleanField(default=False)
+    province=models.ForeignKey('Province',on_delete=models.CASCADE)
+    address=models.TextField(blank=True)
+
     def __str__(self):
-        return str(self.user)
+        return f"Order #{self.pk} - {self.user.phone}"
 
 class OrderItem(models.Model):
     product = models.ForeignKey('Product',models.CASCADE)
     order = models.ForeignKey('Order',on_delete=models.CASCADE)
-    quantity = models.DecimalField(max_digits=9, decimal_places=0)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    line_total = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["order", "product"], name="unique_order_product"),
+            models.CheckConstraint(check=models.Q(quantity__gt=0), name="order_item_quantity_gt_zero"),
+        ]
 
     def __str__(self):
-        return str(self.product)
-
-@receiver(post_save, sender=OrderItem)
-def decrease_quantity_create(sender, instance, created, **kwargs):
-    if created:
-        product = Product.objects.filter(id=instance.product.id).first()
-        inventoryProduct=InventoryProduct.objects.filter(product=product,inventory__province=instance.order.province).first()
-        if product:
-            inventoryProduct.quantity -= instance.quantity
-            if inventoryProduct.quantity>=0:
-                inventoryProduct.save()
-
-            else:
-                pass
-
-
-@receiver(pre_save, sender=OrderItem)
-def decrease_quantity_update(sender, instance, **kwargs):
-    if instance.pk:
-        # Retrieve the original instance of SecondModel from the database
-        original_quantity = OrderItem.objects.get(pk=instance.pk)
-
-        # Calculate the difference between the original count and the new count
-        quantity_diff = original_quantity.quantity - instance.quantity
-        # Update the count field of the first model
-        product = Product.objects.get(id=instance.product.id)
-        inventoryProduct = InventoryProduct.objects.filter(product=product, inventory__province=instance.order.province).first()
-        if product:
-            inventoryProduct.quantity+=quantity_diff
-            if inventoryProduct.quantity >= 0:
-                inventoryProduct.save()
-            else:
-                raise ValueError('Quantity of request is more than quantity of product')
-
-
-
-@receiver(post_delete, sender=OrderItem)
-def increase_count(sender, instance, **kwargs):
-    product = Product.objects.filter(id=instance.product.id).first()
-    inventoryProduct = InventoryProduct.objects.filter(product=product, inventory__province=instance.order.province).first()
-    if product:
-        inventoryProduct.quantity +=instance.quantity
-        if inventoryProduct.quantity >= 0:
-            inventoryProduct.save()
-        else:
-            raise ValueError('Quantity of request is more than quantity of product')
+        return f"{self.product} x {self.quantity}"

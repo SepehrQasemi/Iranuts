@@ -1,333 +1,333 @@
-from typing import Any, Dict
-from django.shortcuts import render,redirect,get_object_or_404
-from django.views.generic import ListView ,TemplateView,CreateView,UpdateView,DeleteView,DetailView
-from .models import *
-from .froms import *
+"""Main storefront and back-office views for the Shop app."""
+
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
+
+from config.mixins import AdminRequiredMixin
+
+from .forms import CategoryForm, InventoryForm, InventoryProductForm, ProductForm, SupplierForm
+from .models import Cart, CartItem, Category, Inventory, InventoryProduct, Order, Product, Province, Supplier
+from .services import add_product_to_cart, create_order_from_cart, update_cart_item_quantity
+
+
+def _redirect_back(request, fallback):
+    return redirect(request.META.get("HTTP_REFERER") or fallback)
+
+
+def _flash_validation_error(request, exc):
+    for error_message in exc.messages:
+        messages.error(request, error_message)
+
 
 class HomePage(TemplateView):
-    template_name = 'HomePage.html'
+    template_name = 'shared/home.html'
 
 
 class AboutUs(TemplateView):
-    template_name = 'AboutUs.html'
+    template_name = 'shared/about.html'
 
 
 class ContactUs(TemplateView):
-    template_name = 'ContactUs.html'
+    template_name = 'shared/contact.html'
 
-
-class ProfileView(TemplateView):
-    template_name='Profile.html'
-
-
-class ProfileEdit(UpdateView):
-    template_name='ProfileEdit.html'
-    
 
 class ProductView(ListView):
-    model=Product
-    template_name="ProductView.html"
-
-
-class ProductCreate(CreateView):
-    model=Product
-    template_name='ProductCreate.html'
-    def get_success_url(self):
-        return reverse_lazy('ProductDetail',args=(self.object.id,))
-    def test_func(self):
-        return self.request.user.is_superuser
-
-
-class ProductEdit(UpdateView):
-    model=Product
-    template_name='ProductEdit.html'
-    def get_success_url(self):
-        return reverse_lazy('ProductDetail',args=(self.object.id,))
-    def test_func(self):
-        return self.request.user.is_superuser
-
-
-class ProductDelete(DeleteView):
     model = Product
-    template_name='ProductDelete.html'
+    template_name = "shop/product_list.html"
+
+
+class ProductCreate(AdminRequiredMixin, CreateView):
+    model = Product
+    form_class = ProductForm
+    template_name = 'shop/product_create.html'
+
+    def get_success_url(self):
+        return reverse_lazy('ProductDetail', args=(self.object.id,))
+
+
+class ProductEdit(AdminRequiredMixin, UpdateView):
+    model = Product
+    form_class = ProductForm
+    template_name = 'shop/product_edit.html'
+    context_object_name = 'product'
+
+    def get_success_url(self):
+        return reverse_lazy('ProductDetail', args=(self.object.id,))
+
+
+class ProductDelete(AdminRequiredMixin, DeleteView):
+    model = Product
+    template_name = 'shop/product_delete.html'
+    context_object_name = 'product'
     success_url = reverse_lazy('ProductView')
-    def test_func(self):
-        return self.request.user.is_superuser
 
 
 class ProductDetail(DetailView):
-    model=Product
-    template_name='ProductDetail.html'
-    context_object_name = 'Product'
+    model = Product
+    template_name = 'shop/product_detail.html'
+    context_object_name = 'product'
 
 
 class CategoryView(ListView):
     model = Category
-    template_name = 'CategoryView.html'
+    template_name = 'shop/category_list.html'
 
 
 class CategoryDetail(DetailView):
     model = Category
-    template_name = 'CategoryDetail.html'
-    
+    template_name = 'shop/category_detail.html'
 
-class CategoryCreate(CreateView):
+
+class CategoryCreate(AdminRequiredMixin, CreateView):
     model = Category
-    template_name = 'CategoryCreate.html'
-    fields = '__all__'
+    form_class = CategoryForm
+    template_name = 'shop/category_create.html'
+
     def get_success_url(self):
-        return reverse_lazy('CategoryDetail',args=(self.object.id,))
-    def test_func(self):
-        return self.request.user.is_superuser
+        return reverse_lazy('CategoryDetail', args=(self.object.id,))
 
 
-class CategoryEdit(UpdateView):
+class CategoryEdit(AdminRequiredMixin, UpdateView):
     model = Category
-    template_name = 'CategoryEdit.html'
-    fields = '__all__'
+    form_class = CategoryForm
+    template_name = 'shop/category_edit.html'
+    context_object_name = 'category'
+
     def get_success_url(self):
-        return reverse_lazy('CategoryDetail',args=(self.object.id,))
-    def test_func(self):
-        return self.request.user.is_superuser
-    
+        return reverse_lazy('CategoryDetail', args=(self.object.id,))
 
-class CategoryDelete(DeleteView):
+
+class CategoryDelete(AdminRequiredMixin, DeleteView):
     model = Category
-    template_name = 'CategoryDelete.html'
+    template_name = 'shop/category_delete.html'
+    context_object_name = 'category'
     success_url = reverse_lazy('CategoryView')
-    def test_func(self):
-        return self.request.user.is_superuser
 
 
-class SupplierView(ListView):
-    model = Category
-    template_name = 'SupplierView.html'
+class SupplierView(AdminRequiredMixin, ListView):
+    model = Supplier
+    template_name = 'shop/supplier_list.html'
 
 
-class SupplierCreate(CreateView):
-    model=Supplier
-    template_name='SupplierCreate.html'
+class SupplierCreate(AdminRequiredMixin, CreateView):
+    model = Supplier
+    form_class = SupplierForm
+    template_name = 'shop/supplier_create.html'
+
     def get_success_url(self):
-        return reverse_lazy('SupplierDetail',args=(self.object.id,))
-    def test_func(self):
-        return self.request.user.is_superuser
+        return reverse_lazy('SupplierDetail', args=(self.object.id,))
 
 
-class SupplierEdit(UpdateView):
-    model=Supplier
-    template_name='SupplierEdit.html'
+class SupplierEdit(AdminRequiredMixin, UpdateView):
+    model = Supplier
+    form_class = SupplierForm
+    template_name = 'shop/supplier_edit.html'
+    context_object_name = 'supplier'
+
     def get_success_url(self):
-        return reverse_lazy('SupplierDetail',args=(self.object.id,))
-    def test_func(self):
-        return self.request.user.is_superuser
+        return reverse_lazy('SupplierDetail', args=(self.object.id,))
 
 
-class SupplierDelete(DeleteView):
-    model=Supplier
-    template_name='SupplierDelete.html'
+class SupplierDelete(AdminRequiredMixin, DeleteView):
+    model = Supplier
+    template_name = 'shop/supplier_delete.html'
+    context_object_name = 'supplier'
     success_url = reverse_lazy('SupplierView')
-    def test_func(self):
-        return self.request.user.is_superuser
 
 
-class SupplierDetail(DetailView):
-    model=Supplier
-    template_name='SupplierDetail.html'
+class SupplierDetail(AdminRequiredMixin, DetailView):
+    model = Supplier
+    template_name = 'shop/supplier_detail.html'
+    context_object_name = 'supplier'
 
 
-class InventoryView(ListView):
+class InventoryView(AdminRequiredMixin, ListView):
     model = Inventory
-    template_name = 'InventoryView.html'
+    template_name = 'shop/inventory_list.html'
 
 
-class InventoryCreate(CreateView):
-    model=Inventory
-    template_name='InventoryCreate.html'
+class InventoryCreate(AdminRequiredMixin, CreateView):
+    model = Inventory
+    form_class = InventoryForm
+    template_name = 'shop/inventory_create.html'
+
     def get_success_url(self):
-        return reverse_lazy('InventoryDetail',args=(self.object.id,))
-    def test_func(self):
-        return self.request.user.is_superuser
+        return reverse_lazy('InventoryDetail', args=(self.object.id,))
 
 
-class InventoryEdit(UpdateView):
-    model=Inventory
-    template_name='InventoryEdit.html'
+class InventoryEdit(AdminRequiredMixin, UpdateView):
+    model = Inventory
+    form_class = InventoryForm
+    template_name = 'shop/inventory_edit.html'
+    context_object_name = 'inventory'
+
     def get_success_url(self):
-        return reverse_lazy('InventoryDetail',args=(self.object.id,))
+        return reverse_lazy('InventoryDetail', args=(self.object.id,))
 
 
-class InventoryDelete(DeleteView):
-    model=Inventory
-    template_name='InventoryDelete.html'
+class InventoryDelete(AdminRequiredMixin, DeleteView):
+    model = Inventory
+    template_name = 'shop/inventory_delete.html'
+    context_object_name = 'inventory'
     success_url = reverse_lazy('InventoryView')
-    def test_func(self):
-        return self.request.user.is_superuser
 
 
-class InventoryDetail(DetailView):
-    model=Inventory
-    template_name='InventoryDetail.html'
+class InventoryDetail(AdminRequiredMixin, DetailView):
+    model = Inventory
+    template_name = 'shop/inventory_detail.html'
+    context_object_name = 'inventory'
 
 
+class SearchView(TemplateView):
+    template_name = "shop/search_results.html"
 
-    
-class Search (TemplateView):
-    template_name="Search.html"
-    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        Search=self.request.GET.get('search')
-        
-        try:
-            context['products'] = Product.objects.filter(name__contains=Search)
-        except:
-            pass
-
-        try:
-            context['Category'] = Category.objects.filter(name__contains=Search)
-        except:
-            pass
-
-    
+        query = self.request.GET.get('search', '').strip()
+        context['query'] = query
+        context['products'] = Product.objects.filter(name__icontains=query) if query else Product.objects.none()
+        context['categories'] = Category.objects.filter(name__icontains=query) if query else Category.objects.none()
         return context
 
 
-class InventoryProductView(UserPassesTestMixin,ListView):
+class InventoryProductView(AdminRequiredMixin, ListView):
     model = InventoryProduct
-    template_name = 'InventoryProduct.html'
-
-    def test_func(self):
-        return self.request.user.is_superuser
+    template_name = 'shop/inventory_product_list.html'
 
 
-class InventoryProductDetail(UserPassesTestMixin,DetailView):
+class InventoryProductDetail(AdminRequiredMixin, DetailView):
     model = InventoryProduct
-    template_name = 'InventoryProductDetail.html'
-
-    def test_func(self):
-        return self.request.user.is_superuser
+    template_name = 'shop/inventory_product_detail.html'
+    context_object_name = 'inventoryproduct'
 
 
-class InventoryProductCreate(UserPassesTestMixin,CreateView):
+class InventoryProductCreate(AdminRequiredMixin, CreateView):
     model = InventoryProduct
-    template_name = 'InventoryProductCreate.html'
+    form_class = InventoryProductForm
+    template_name = 'shop/inventory_product_create.html'
+
     def get_success_url(self):
-        return reverse_lazy('InventoryProductDetail',args=(self.object.id,))
-    def test_func(self):
-        return self.request.user.is_superuser
-    
+        return reverse_lazy('InventoryProductDetail', args=(self.object.id,))
 
-class InventoryProductEdit(UserPassesTestMixin,UpdateView):
+
+class InventoryProductEdit(AdminRequiredMixin, UpdateView):
     model = InventoryProduct
-    template_name = 'InventoryProductCreate.html'
+    form_class = InventoryProductForm
+    template_name = 'shop/inventory_product_edit.html'
+    context_object_name = 'inventoryproduct'
+
     def get_success_url(self):
-        return reverse_lazy('InventoryProductDetail',args=(self.object.id,))
+        return reverse_lazy('InventoryProductDetail', args=(self.object.id,))
 
-    def test_func(self):
-        return self.request.user.is_superuser
-    
 
-class InventoryProductDelete(UserPassesTestMixin,DeleteView):
+class InventoryProductDelete(AdminRequiredMixin, DeleteView):
     model = InventoryProduct
-    template_name = 'InventoryProductDelete.html'
+    template_name = 'shop/inventory_product_delete.html'
+    context_object_name = 'inventoryproduct'
     success_url = reverse_lazy('InventoryProduct')
-    def test_func(self):
-        return self.request.user.is_superuser
 
-class CartDetailView(UserPassesTestMixin,DetailView):
+
+class CartDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Cart
-    template_name = 'CartView.html'
-    
+    template_name = 'shop/cart_detail.html'
+    context_object_name = 'cart'
+
     def get_context_data(self, **kwargs):
-        context=super(CartDetailView, self).get_context_data()
-        totalPrice=0
-        for cartItem in context['cart'].cartitem_set.all():
-            totalPrice+=cartItem.quantity*cartItem.product.price
-        context['totalprice']=totalPrice
-        province=Province.objects.filter(inventory__in=Inventory.objects.all())
-        context['province']=province
+        context = super().get_context_data(**kwargs)
+        cart_items = context['cart'].cartitem_set.select_related('product')
+        context['totalprice'] = sum(cart_item.quantity * cart_item.product.price for cart_item in cart_items)
+        context['provinces'] = Province.objects.filter(inventory__isnull=False).distinct()
         return context
+
     def test_func(self):
-        return self.request.user==self.get_object().user
+        return self.request.user == self.get_object().user
 
 
-
-def addToCart(request):
-    if request.method=='POST':
-        cart=Cart.objects.get(user=request.user)
-        cartItem=CartItem(cart=cart,product_id=request.POST.get('Product'),quantity=int(request.POST.get('quantity')))
-        cartItem.save()
-        return redirect(request.META['HTTP_REFERER'])
-
-def updateCart(request,cartItemId):
-    
-    if request.method=='POST':
-        cartItem=CartItem.objects.get(id=cartItemId,cart__user=request.user)
-        cartItem.quantity=float(request.POST.get('quantity'))
-        cartItem.save()
-        return redirect(request.META['HTTP_REFERER'])
-
-
-def deletFromCart(request,cartItemId):
-    if request.method=='POST':
-        cartItem=CartItem.objects.get(id=cartItemId,cart__user=request.user)
-        cartItem.delete()
-        return redirect(request.META['HTTP_REFERER'])
-
-class OrderView(UserPassesTestMixin,ListView):
-    model = Order
-    template_name = 'OrderView.html'
-    def test_func(self):
-        return self.request.user.is_superuser
+@login_required
+def add_to_cart(request):
+    if request.method == 'POST':
+        product = get_object_or_404(
+            Product,
+            id=request.POST.get('product_id') or request.POST.get('Product'),
+        )
+        try:
+            add_product_to_cart(
+                user=request.user,
+                product=product,
+                quantity=request.POST.get('quantity', 0),
+            )
+        except ValidationError as exc:
+            _flash_validation_error(request, exc)
+    return _redirect_back(request, 'HomePage')
 
 
-def orderCreate(request):
-    if request.method=="POST":
-        order=Order(user=request.user , province_id=request.POST.get('orderprovince'),address=request.POST.get('orderaddress'))
-        items = []
-        x=True
-        province=Province.objects.get(id=request.POST.get('orderprovince'))
-        for idItem in tuple(dict(request.POST).values())[3:]:
-            cartitem=CartItem.objects.get(id=int(idItem[0]))
-            product=cartitem.product
-            if product.inventoryproduct_set.filter(inventory__province=province):
-                inventoryProduct=product.inventoryproduct_set.get(inventory__province=province)
-                if inventoryProduct.quantity>cartitem.quantity:
-                    items.append(OrderItem(product=product,order=order,quantity=cartitem.quantity))
+@login_required
+def update_cart(request, cart_item_id):
+    if request.method == 'POST':
+        cart_item = get_object_or_404(CartItem, id=cart_item_id, cart__user=request.user)
+        try:
+            quantity = int(request.POST.get('quantity', 0))
+        except (TypeError, ValueError):
+            messages.error(request, 'Quantity must be a valid whole number.')
+            return _redirect_back(request, 'HomePage')
 
-                else:
-                    x=False
-                    messages.error(request,f'{product.name}:Your request is more than our quantity')
+        if quantity <= 0:
+            cart_item.delete()
+        else:
+            try:
+                update_cart_item_quantity(cart_item=cart_item, quantity=quantity)
+            except ValidationError as exc:
+                _flash_validation_error(request, exc)
+    return _redirect_back(request, 'HomePage')
 
-            else:
-                x=False
-                messages.error(request,f'{product.name}:This product is not available in your province')
 
-        if x:
-            order.save()
-            for item in items:
-                item.save()
-            Cart.objects.get(user=request.user).delete()
-            Cart(user=request.user).save()
+@login_required
+def delete_from_cart(request, cart_item_id):
+    if request.method == 'POST':
+        cart_item = get_object_or_404(CartItem, id=cart_item_id, cart__user=request.user)
+        cart_item.delete()
+    return _redirect_back(request, 'HomePage')
+
+
+@login_required
+def create_order(request):
+    if request.method == "POST":
+        province_id = request.POST.get('province_id') or request.POST.get('orderprovince')
+        if not province_id:
+            messages.error(request, 'Please choose a province before ordering.')
+            return redirect('cart_detail', request.user.cart.id)
+
+        province = get_object_or_404(Province, id=province_id)
+        address = request.POST.get('address') or request.POST.get('orderaddress', '')
+        cart_item_ids = request.POST.getlist('cart_item_ids') or request.POST.getlist('cartitem_ids')
+        try:
+            create_order_from_cart(
+                user=request.user,
+                province=province,
+                address=address,
+                cart_item_ids=cart_item_ids,
+            )
+            messages.success(request, 'Your order was created successfully.')
             return redirect('HomePage')
-        return redirect('CartView',request.user.cart.id)
+        except ValidationError as exc:
+            _flash_validation_error(request, exc)
+
+    return redirect('cart_detail', request.user.cart.id)
 
 
-
-class OrderListVeiw(UserPassesTestMixin,ListView):
+class OrderListView(AdminRequiredMixin, ListView):
     model = Order
-    template_name = 'orders.html'
-    def test_func(self):
-        return self.request.user.is_superuser
+    template_name = 'shop/order_list.html'
 
-class OrderUpdate(UserPassesTestMixin,UpdateView):
+
+class OrderUpdate(AdminRequiredMixin, UpdateView):
     model = Order
-    template_name = 'orderupdate.html'
-    fields = ['is_send']
-    success_url = reverse_lazy('orders')
-    def test_func(self):
-        return self.request.user.is_superuser
-
+    template_name = 'shop/order_update.html'
+    fields = ['is_sent']
+    context_object_name = 'order'
+    success_url = reverse_lazy('order_list')

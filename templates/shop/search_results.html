@@ -1,0 +1,25 @@
+{% extends 'Base.html'%}
+{% block content %}
+<div class="container">
+    <h1>Search results</h1>
+    <p>Query: <strong>{{ query }}</strong></p>
+
+    <h2>Products</h2>
+    <ul>
+        {% for product in products %}
+            <li><a href="{% url 'ProductDetail' product.id %}">{{ product.name }}</a></li>
+        {% empty %}
+            <li>No products found.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Categories</h2>
+    <ul>
+        {% for category in categories %}
+            <li><a href="{% url 'CategoryDetail' category.id %}">{{ category.name }}</a></li>
+        {% empty %}
+            <li>No categories found.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock content %}

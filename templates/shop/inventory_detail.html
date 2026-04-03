@@ -1,0 +1,21 @@
+{% extends 'Base.html'%}
+{% block content %}
+<table class="table table-striped table-hover">
+    <tbody>
+        <tr>
+            <th scope="row">Province</th>
+            <td>{{ inventory.province }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Phone</th>
+            <td>{{ inventory.phone }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Address</th>
+            <td>{{ inventory.address }}</td>
+        </tr>
+    </tbody>
+</table>
+<a href="{% url 'InventoryEdit' inventory.id %}" class="btn btn-primary">Edit Inventory</a>
+<a href="{% url 'InventoryDelete' inventory.id %}" class="btn btn-danger">Delete Inventory</a>
+{% endblock content %}

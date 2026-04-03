@@ -1,0 +1,17 @@
+{% extends 'Base.html' %}
+{% block content %}
+<ul class="list-group m-5 align-items-center">
+    {% for order in order_list %}
+        <li class="list-group-item city-list w-50">
+            <a href="{% url 'order_update' order.id %}" class="link-dark link-underline link-underline-opacity-0 link-underline-opacity-50-hover">
+                {{ order.user.phone }} - {{ order.province.name }}
+            </a>
+            {% if order.is_sent %}
+                <span class="ms-2 badge bg-success">Sent</span>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li class="list-group-item city-list w-50">No orders found.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
