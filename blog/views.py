@@ -1,38 +1,39 @@
-from django.shortcuts import render
-from .models import Post
-from django.views.generic import ListView,DetailView,DeleteView,UpdateView,CreateView
 from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+
+from config.mixins import AdminRequiredMixin
+
+from .forms import PostForm
+from .models import Post
 
 
 class PostView(ListView):
     model = Post 
-    template_name = 'Blog.html'
+    template_name = 'blog/post_list.html'
     context_object_name = 'post_list'
 
 class PostDetails(DetailView):
     model = Post
-    template_name = 'PostDetails.html'
-    context_object_name = 'Post'
+    template_name = 'blog/post_detail.html'
+    context_object_name = 'post'
 
-class PostEdit(UpdateView):
+class PostEdit(AdminRequiredMixin, UpdateView):
     model = Post
-    template_name = 'PostEdit.html'
-    fields=['title','summaries','body',]
-    def test_func(self):
-        return self.request.user.is_superuser
+    form_class = PostForm
+    template_name = 'blog/post_edit.html'
+    context_object_name = 'post'
 
-class PostDelete(DeleteView):
+class PostDelete(AdminRequiredMixin, DeleteView):
     model = Post
-    template_name = 'PostDelete.html'
-    context_object_name = 'Post'
-    fields = '__all__'
+    template_name = 'blog/post_delete.html'
+    context_object_name = 'post'
     success_url = reverse_lazy('Blog')
-    def test_func(self):
-        return self.request.user.is_superuser
 
-class PostCreate(CreateView):
+class PostCreate(AdminRequiredMixin, CreateView):
     model = Post
-    template_name = 'PostCreate.html'
-    fields = '__all__'
-    def test_func(self):
-        return self.request.user.is_superuser
+    form_class = PostForm
+    template_name = 'blog/post_create.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)

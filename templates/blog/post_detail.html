@@ -1,0 +1,13 @@
+{% extends 'Base.html' %}
+{% block content %}
+    <div><h1>{{ post.title }}</h1><br>
+        <h5>Summary:</h5>
+        <p><b>{{ post.summary|default:"No summary provided." }}</b></p><br>
+        <p>{{ post.body }}</p>
+    </div>
+    <br>
+    {% if user.is_superuser %}
+        <a href="{% url 'PostEdit' post.id %}" class="btn btn-primary">Edit Post</a>
+        <a href="{% url 'PostDelete' post.id %}" class="btn btn-danger">Delete Post</a>
+    {% endif %}
+{% endblock content %}
