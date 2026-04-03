@@ -152,15 +152,31 @@ python manage.py test
 
 ## Screenshots
 
-Screenshots are intentionally not committed yet.
+Representative local screenshots are available below. These were captured from a local demo dataset created only for documentation purposes. A fuller gallery with notes is available in [docs/screenshots.md](docs/screenshots.md).
 
-Suggested captures:
+### Home page
 
-- home page
-- product detail page
-- cart/order flow
-- inventory admin page
-- order admin page
+![Home page](docs/screenshots/home.png)
+
+### Product list
+
+![Product list](docs/screenshots/product-list.png)
+
+### Product detail
+
+![Product detail](docs/screenshots/product-detail.png)
+
+### Cart
+
+![Cart](docs/screenshots/cart.png)
+
+### Blog
+
+![Blog](docs/screenshots/blog.png)
+
+### Admin
+
+![Admin](docs/screenshots/admin.png)
 
 ## Known Limitations
 
