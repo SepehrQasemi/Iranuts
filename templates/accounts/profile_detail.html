@@ -1,0 +1,24 @@
+{% extends 'Base.html' %}
+{% block content %}
+<table class="table table-striped table-hover rounded">
+    <tbody>
+        <tr>
+            <th scope="row">Name</th>
+            <td>{{ profile_user.first_name }} {{ profile_user.last_name }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Email</th>
+            <td>{{ profile_user.email }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Phone</th>
+            <td>{{ profile_user.phone }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Address</th>
+            <td>{{ profile_user.address }}</td>
+        </tr>
+    </tbody>
+</table>
+<a href="{% url 'accounts:profile-edit' profile_user.id %}" class="btn btn-primary">Edit Profile</a>
+{% endblock %}

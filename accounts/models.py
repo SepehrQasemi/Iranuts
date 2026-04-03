@@ -1,9 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
-from Shop.models import *
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
+from Shop.models import Cart
+
 from .managers import CustomUserManager
 
 
@@ -16,7 +18,6 @@ class CustomUser (AbstractUser):
         )
     ])
     email = models.CharField(max_length=254,null=True,blank=True)
-    # province = models.ForeignKey(Province,on_delete=models.SET_NULL,null=True,blank=True)
     address = models.TextField(null=True,blank=True)
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = []
@@ -28,8 +29,6 @@ class CustomUser (AbstractUser):
     objects = CustomUserManager()
 
 @receiver(post_save,sender=CustomUser)
-def addCart (sender,instance,created,**kwargs):
+def add_cart(sender, instance, created, **kwargs):
     if created:
-        cart=Cart(user=instance)
-        cart.save()
-
+        Cart.objects.create(user=instance)

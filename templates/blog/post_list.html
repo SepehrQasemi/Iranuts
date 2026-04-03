@@ -1,0 +1,21 @@
+{% extends 'Base.html' %}
+{% block content %}
+<h1>Articles</h1>
+<div>
+<ul class="list-unstyled">
+    {% for post in post_list %}
+        <li>
+            <div class="card w-100 mb-3">
+              <div class="card-body">
+              <h5 class="card-title">{{ post.title }}</h5>
+              <p class="card-text">Summary: {{ post.summary|default:"No summary provided." }}</p>
+              <a href="{% url 'PostDetails' post.pk %}" class="btn btn-primary">More...</a>
+              </div>
+            </div>
+        </li>
+    {% empty %}
+        <li>No articles have been published yet.</li>
+    {% endfor %}
+</ul>
+</div>
+{% endblock content %}

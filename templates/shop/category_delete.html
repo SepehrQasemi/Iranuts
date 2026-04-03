@@ -1,0 +1,9 @@
+{% extends 'Base.html'%}
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <h2>Are you sure?</h2>
+    <button type="submit" class="btn btn-danger">Yes</button>
+    <a href="{% url 'CategoryDetail' category.id %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock content %}

@@ -1,0 +1,26 @@
+{% extends 'Base.html' %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">{{ order.user.first_name }} {{ order.user.last_name }}</div>
+        <div class="col">{{ order.user.phone }} - {{ order.province.name }}</div>
+    </div>
+    <div class="row mt-2">
+        <div class="col">{{ order.address }}</div>
+    </div>
+
+    {% for orderitem in order.orderitem_set.all %}
+        <div class="row">
+            <div class="col">{{ orderitem.product.name }} - {{ orderitem.quantity }} kilogram at ${{ orderitem.unit_price }} each (line total: ${{ orderitem.line_total }})</div>
+        </div>
+    {% endfor %}
+
+    <form method="post" class="mt-3">
+        {% csrf_token %}
+        <label for="{{ form.is_sent.id_for_label }}">Mark as sent</label>
+        {{ form.is_sent }}
+        <br>
+        <button type="submit" class="btn btn-success">Save</button>
+    </form>
+</div>
+{% endblock %}

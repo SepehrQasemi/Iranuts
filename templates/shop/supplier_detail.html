@@ -1,0 +1,29 @@
+{% extends 'Base.html'%}
+{% block content %}
+<table class="table table-striped table-hover">
+    <tbody>
+        <tr>
+            <th scope="row">Name</th>
+            <td>{{ supplier.name }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Province</th>
+            <td>{{ supplier.province }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Phone</th>
+            <td>{{ supplier.phone }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Email</th>
+            <td>{{ supplier.email }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Address</th>
+            <td>{{ supplier.address }}</td>
+        </tr>
+    </tbody>
+</table>
+<a href="{% url 'SupplierEdit' supplier.id %}" class="btn btn-primary">Edit Supplier</a>
+<a href="{% url 'SupplierDelete' supplier.id %}" class="btn btn-danger">Delete Supplier</a>
+{% endblock content %}
