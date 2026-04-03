@@ -1,0 +1,85 @@
+{% extends 'Base.html' %}
+{% load humanize %}
+
+{% block content %}
+<section class="h-100 h-custom w-75 mx-auto bg-transparent" style="background-color: #eee;">
+    <div class="container h-100 py-5">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col">
+                <div class="card shopping-cart" style="border-radius: 15px;">
+                    <div class="card-body text-black">
+                        <div class="row">
+                            <div class="col-lg-6 px-5 py-4">
+                                <h3 class="mb-5 pt-2 text-center fw-bold text-uppercase">Your Cart</h3>
+
+                                {% for cartitem in cart.cartitem_set.all %}
+                                    <div class="d-flex align-items-center mb-5">
+                                        <div class="flex-shrink-0">
+                                            <img src="{{ cartitem.product.image.url }}" class="img-fluid" style="width: 150px;" alt="{{ cartitem.product.name }}">
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h5 class="text-primary">{{ cartitem.product.name }}</h5>
+                                            <h6 style="color: #9e9e9e;">Category: {{ cartitem.product.category.name }}</h6>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <p class="fw-bold mb-0 me-3">{{ cartitem.product.price|intcomma }}</p>
+                                                <form method="post" action="{% url 'cart_update' cartitem.id %}" class="d-flex align-items-center gap-2">
+                                                    {% csrf_token %}
+                                                    <input class="quantity fw-bold text-black rounded" min="1" name="quantity" value="{{ cartitem.quantity }}" type="number">
+                                                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                                                </form>
+                                                <form method="post" action="{% url 'cart_delete' cartitem.id %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <p>Your cart is empty.</p>
+                                {% endfor %}
+
+                                <hr class="mb-4" style="height: 2px; background-color: #1266f1; opacity: 1;">
+
+                                <div class="d-flex justify-content-between p-2 mb-2" style="background-color: #e1f5fe;">
+                                    <h5 class="fw-bold mb-0">Total:</h5>
+                                    <h5 class="fw-bold mb-0">{{ totalprice|intcomma }}$</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'order_create' %}" class="form-control w-75 mx-auto">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col">
+                <label>Choose your province:</label>
+            </div>
+            <div class="col">
+                <select name="province_id" required class="form-select" style="width: fit-content" id="orderprovince">
+                    <option value="" selected>---------</option>
+                    {% for province_item in provinces %}
+                        <option value="{{ province_item.id }}">{{ province_item.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col">
+                <label>Address:</label>
+            </div>
+            <textarea name="address" class="form-control w-75"></textarea>
+        </div>
+
+        {% for cartitem in cart.cartitem_set.all %}
+            <input type="hidden" name="cart_item_ids" value="{{ cartitem.id }}">
+        {% endfor %}
+
+        <button type="submit" id="orderbtn" class="btn btn-primary mb-4 btn-lg pl-5 pr-5 mt-3">Order</button>
+    </form>
+</section>
+{% endblock %}

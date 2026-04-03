@@ -1,0 +1,11 @@
+{% extends 'Base.html' %}
+{% block content %}
+<div class="container-fluid">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-sm btn-success mt-2" type="submit">Save</button>
+        <a href="{% url 'InventoryProductDetail' inventoryproduct.id %}" class="btn btn-sm btn-secondary mt-2">Cancel</a>
+    </form>
+</div>
+{% endblock %}
