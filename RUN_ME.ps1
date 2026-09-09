@@ -83,6 +83,12 @@ else {
     Write-Step "Using existing .env file"
 }
 
+Write-Step "Preparing local environment"
+& $venvPython scripts\prepare_env.py
+if ($LASTEXITCODE -ne 0) {
+    Fail "Local environment preparation failed."
+}
+
 Write-Step "Applying migrations"
 & $venvPython manage.py migrate
 if ($LASTEXITCODE -ne 0) {
